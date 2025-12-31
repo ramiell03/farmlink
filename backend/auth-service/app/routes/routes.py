@@ -5,7 +5,10 @@ from app.services.auth_service import register_user, authenticate_user
 from app.db.database import SessionLocal
 from app.core.config import SECRET_KEY, JWT_ALGORITHM
 from jose import jwt
+from app.models.user import User
 from app.core.dependencies import require_roles
+from app.core.security import create_access_token, decode_token
+
 router = APIRouter(prefix="/auth",tags=["Authentication"])
 
 def get_db():
@@ -18,7 +21,7 @@ def get_db():
 @router.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
     try:
-        return register_user(db, user.email, user.password,user.username, user.role)
+        return register_user(db, user.email, user.password,user.username, user.role, user.location, user.phone_number)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -34,10 +37,24 @@ def login(user: UserLogin, db:Session = Depends(get_db)):
 
 @router.get("/profile")
 def user_profile(
-    user=Depends(require_roles(["farmer", "buyer", "admin"]))
+    db: Session = Depends(get_db),
+    token_data=Depends(require_roles(["farmer", "buyer", "admin"]))
 ):
+    user = db.query(User).filter(User.email == token_data["email"]).first()
     return{
-        "email": user["email"],
-        "role": user["role"],
-        "username": user["username"]
+        "email": user.email,
+        "role": user.role,
+        "username": user.username
     }
+    
+@router.post("/refresh-token")
+def refresh_token(refresh_token:str):
+    payload = decode_token(refresh_token)
+    
+    new_token = create_access_token({
+        "sub": payload["sub"],
+        "role": payload["role"]
+    })
+    
+    return {"access_token": new_token}
+    

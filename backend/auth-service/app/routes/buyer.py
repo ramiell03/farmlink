@@ -5,7 +5,7 @@ router = APIRouter(prefix="/buyer", tags=["buyer Operations"])
 
 @router.get("/market")
 def buyer_market(
-    user=Depends(require_roles(["buyer"]))
+    user=Depends(require_roles(["buyer", "admin"]))
 ):
     return{
         "message": "Buyer market access granted",
