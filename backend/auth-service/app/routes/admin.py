@@ -83,4 +83,20 @@ def search_users_by_role(
         )
         
     return users
+
+@router.put("/user/{user_id}/role")
+def update_user_role(
+    user_id: int,
+    role: str,
+    current_user=Depends(require_roles(["admin"])),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == user_id).first
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.role = role
+    db.commit()
+    return {"message": "Role Updated"}
                                    
