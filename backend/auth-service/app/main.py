@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.db.database import engine
 import logging
-from app.core.config import settings
+from app.core.core import settings
 
 
 @asynccontextmanager

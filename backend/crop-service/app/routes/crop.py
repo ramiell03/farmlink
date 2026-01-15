@@ -6,6 +6,7 @@ from app.models.crop import Crop
 from app.schemas.crop_schemas import CropCreate, CropResponse
 from app.db.database import SessionLocal
 from app.core.crop_trie import crop_trie
+from app.core.auth_client import require_roles
 
 
 def get_db():
@@ -23,10 +24,11 @@ router = APIRouter(
 
 @router.get("/search/autocomplete")
 def autocomplete_crops(
-    q: str = Query(..., min_length=1, description="crop name prefix")
+    q: str = Query(..., min_length=1, description="crop name prefix"),
+    user=Depends(require_roles(["admin","farmer","buyer"]))
     
 ):
-    suggestions = crop_trie.autocomplete(q)
+    suggestions = crop_trie.autocomplete(q.lower(), limit=10)
     
     return{
         "query": q,
@@ -36,7 +38,8 @@ def autocomplete_crops(
 @router.post("/", response_model=CropResponse, status_code=status.HTTP_201_CREATED)
 def create_crop(
     payload:CropCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(["admin"]))
 ):
   existing = db.query(Crop).filter(Crop.name == payload.name).first()
   if existing:
@@ -59,24 +62,32 @@ def create_crop(
 @router.get("/{crop_id}", response_model=CropResponse)
 def get_crop(
     crop_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(["admin","farmer","buyer"]))
+    
 ):
-    crop = db.query(Crop).filter(Crop.id == crop_id, crop.is_active == True).first()
+    crop = db.query(Crop).filter(Crop.id == crop_id, Crop.is_active == True).first()
     if not crop:
         raise HTTPException(status_code=404, detail="Crop not found")
     
     return crop
 
-
+ 
 @router.get("/", response_model=list[CropResponse])
-def list_crops(db: Session = Depends(get_db)):
+def list_crops(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+               user=Depends(require_roles(["admin","farmer","buyer"]))):
     return db.query(Crop).filter(Crop.is_active == True).all()
 
 
 @router.delete("/{crop_id}", status_code=204)
 def delete_crop(
     crop_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(["admin"]))
+    
 ):
     crop = db.query(Crop).filter(Crop.id == crop_id).first()
     if not crop:
@@ -93,7 +104,9 @@ def delete_crop(
 def update_crop(
     crop_id: int,
     payload: CropCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(["admin","farmer"]))
+    
 ):
     crop = db.query(Crop).filter(Crop.id == crop_id).first()
     if not crop:
@@ -114,7 +127,8 @@ def update_crop(
 
 
 @router.patch("/{crop_id}/restore", response_model=CropResponse)
-def restore_crop(crop_id:int, db:Session = Depends(get_db)):
+def restore_crop(crop_id:int, db:Session = Depends(get_db),
+                 user=Depends(require_roles(["admin"]))):
     crop = db.query(Crop).filter(Crop.id == crop_id).first()
     
     if not crop:

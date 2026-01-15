@@ -4,16 +4,20 @@ from typing import List
 class Settings(BaseSettings):
     ENV: str = "development"
 
+    # Database
     DATABASE_URL: str
+
+    # Security (needed if you validate JWTs)
     SECRET_KEY: str
-    JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
+    # Service-to-service communication
+    AUTH_SERVICE_URL: str
 
     ALLOWED_ORIGINS: List[str] = ["*"]
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        extra="forbid"  
+        extra="forbid"
     )
 
 settings = Settings()
