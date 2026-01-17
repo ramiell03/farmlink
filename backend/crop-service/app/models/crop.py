@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
 from app.db.database import Base
 
 class Crop(Base):
-    __tablename__ = "Crop"
+    __tablename__ = "crops"
     
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)

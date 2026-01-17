@@ -29,7 +29,7 @@ class Trie:
             should_delete = _delete(node.children.get(char),word, depth + 1)
             
             if should_delete:
-                del node.children[chr]
+                del node.children[char]
                 return not node.is_end and len(node.children) == 0
             return False
         _delete(self.root, word.lower(), 0)
@@ -41,7 +41,7 @@ class Trie:
         for char, child in node.children.items():
             self._dfs(child, prefix + char, results)
     
-    def autocomplete(self, prefix:str):
+    def autocomplete(self, prefix:str, limit:int = 10):
         node = self.root
         prefix = prefix.lower()
         

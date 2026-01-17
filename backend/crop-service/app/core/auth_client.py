@@ -29,6 +29,9 @@ def get_current_user(authorization: Optional[str] = Header(None)):
             headers={"Authorization": f"Bearer {token}"},
             timeout=5
         )
+        print("AUTH STATUS:", response.status_code)
+        print("AUTH BODY:", response.text)
+        
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
