@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from app.core.crop_trie import crop_trie
 from app.db.database import SessionLocal
-from app.models.crop import Crop
+from app.models import Crop, CropListing
+from app.routes.crop_listings import router as crop_listings_router
 from app.routes.crop import router as crop_router
 
 app = FastAPI(title= "Crop Service")
@@ -19,3 +20,4 @@ def load_trie_from_db():
         db.close()
 
 app.include_router(crop_router)
+app.include_router(crop_listings_router)

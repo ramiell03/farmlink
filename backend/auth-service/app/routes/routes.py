@@ -43,6 +43,7 @@ def user_profile(
 ):
     user = db.query(User).filter(User.email == token_data["email"]).first()
     return{
+        "id": user.id,
         "email": user.email,
         "role": user.role,
         "username": user.username

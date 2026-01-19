@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
 from app.db.database import Base
+from sqlalchemy.orm import relationship
 
 class Crop(Base):
     __tablename__ = "crops"
@@ -12,3 +13,5 @@ class Crop(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(),
                         onupdate=func.now())
+    
+    listings = relationship("CropListing", back_populates="crop")
