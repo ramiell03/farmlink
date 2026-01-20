@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi import Query, FastAPI
@@ -7,6 +8,7 @@ from app.schemas.crop_schemas import CropCreate, CropResponse
 from app.db.database import SessionLocal
 from app.core.crop_trie import crop_trie
 from app.core.auth_client import require_roles
+from app.schemas.pagination import PaginatedResponse
 
 
 def get_db():
@@ -61,7 +63,7 @@ def create_crop(
 
 @router.get("/{crop_id}", response_model=CropResponse)
 def get_crop(
-    crop_id: int,
+    crop_id: UUID,
     db: Session = Depends(get_db),
     user=Depends(require_roles(["admin","farmer","buyer"]))
     
@@ -73,18 +75,40 @@ def get_crop(
     return crop
 
  
-@router.get("/", response_model=list[CropResponse])
+@router.get("/", response_model=PaginatedResponse[CropResponse])
 def list_crops(
-    skip: int = 0,
-    limit: int = 100,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    q: str | None = Query(None, description="Search by crop name"),
     db: Session = Depends(get_db),
-               user=Depends(require_roles(["admin","farmer","buyer"]))):
-    return db.query(Crop).filter(Crop.is_active == True).all()
+    user=Depends(require_roles(["admin","farmer","buyer"]))
+):
+    query = db.query(Crop).filter(Crop.is_active == True)
+
+    if q:
+        query = query.filter(Crop.name.ilike(f"%{q}%"))
+
+    total = query.count()
+
+    crops = (
+        query
+        .order_by(Crop.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "items": crops
+    }
 
 
 @router.delete("/{crop_id}", status_code=204)
 def delete_crop(
-    crop_id: int,
+    crop_id: UUID,
     db: Session = Depends(get_db),
     user=Depends(require_roles(["admin"]))
     
@@ -102,7 +126,7 @@ def delete_crop(
     
 @router.put("/{crop_id}", response_model=CropResponse)
 def update_crop(
-    crop_id: int,
+    crop_id: UUID,
     payload: CropCreate,
     db: Session = Depends(get_db),
     user=Depends(require_roles(["admin","farmer"]))
@@ -127,7 +151,7 @@ def update_crop(
 
 
 @router.patch("/{crop_id}/restore", response_model=CropResponse)
-def restore_crop(crop_id:int, db:Session = Depends(get_db),
+def restore_crop(crop_id: UUID, db:Session = Depends(get_db),
                  user=Depends(require_roles(["admin"]))):
     crop = db.query(Crop).filter(Crop.id == crop_id).first()
     

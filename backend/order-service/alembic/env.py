@@ -7,15 +7,14 @@ from alembic import context
 
 import os
 from dotenv import load_dotenv
-from app.models.crop import Crop
-from app.models.crop_listing import CropListing
-from app.db.database import Base
 from sqlalchemy import create_engine
+from app.models.order import Order
+from app.models.cart import CartItem
+from app.db.database import Base
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -50,7 +49,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url", DATABASE_URL)
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=Base.metadata,
@@ -71,7 +70,7 @@ def run_migrations_online() -> None:
     """
     
     if not DATABASE_URL:
-        raise RuntimeError("DATABASE_URL not set")
+        raise RuntimeError("DATABASE_URL is not set")
     connectable = create_engine(
         DATABASE_URL,
         poolclass=pool.NullPool,

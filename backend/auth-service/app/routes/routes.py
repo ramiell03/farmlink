@@ -34,7 +34,10 @@ def login(user: UserLogin, db:Session = Depends(get_db)):
     
     payload = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
     role = payload.get("role")
-    return {"access_token": token, "token_type": "bearer", "role": role}
+    refresh_token = create_access_token(
+        {"sub": user.email, "role": role})
+
+    return {"access_token": token, "token_type": "bearer", "role": role, "refresh-token": refresh_token}
 
 @router.get("/profile")
 def user_profile(

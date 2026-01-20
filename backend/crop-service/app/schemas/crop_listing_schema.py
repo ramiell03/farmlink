@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
+from uuid import UUID
 
 class CropListingBase(BaseModel):
-    crop_id: int
+    crop_id: UUID
     price: int
     quantity: float
     location: str
@@ -11,9 +12,9 @@ class CropListingCreate(CropListingBase):
     pass
     
 class CropListingResponse(BaseModel):
-    id: int
-    crop_id: int
-    farmer_id: int
+    id: UUID
+    crop_id: UUID
+    farmer_id: UUID
     price: int
     quantity: float
     location: str
