@@ -46,7 +46,7 @@ def load_trie_from_db():
     finally:
         db.close()
         
-API_PREFIX = "/api/v2"
+API_PREFIX = "/api/v1"
 
 
 app.include_router(crop_router, prefix=API_PREFIX)

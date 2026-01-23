@@ -27,7 +27,7 @@ def get_current_user(authorization: Optional[str] = Header(None)):
         response = requests.get(
             f"{AUTH_SERVICE_URL}/auth/profile",
             headers={"Authorization": f"Bearer {token}"},
-            timeout=5
+            timeout=10
         )
         print("AUTH STATUS:", response.status_code)
         print("AUTH BODY:", response.text)

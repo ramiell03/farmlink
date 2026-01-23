@@ -4,6 +4,8 @@ from app.db.database import Base
 from app.enums.order_status import OrderStatus
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
 
 class Order(Base):
     __tablename__ = "orders"
@@ -14,3 +16,4 @@ class Order(Base):
     quantity = Column(Integer, nullable=False)
     total_price = Column(Float, nullable=False)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING, nullable=False)
+    

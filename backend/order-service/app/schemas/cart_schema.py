@@ -15,7 +15,7 @@ class CartItemResponse(BaseModel):
     status: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CartCheckoutResponse(BaseModel):
     order_ids: List[UUID]

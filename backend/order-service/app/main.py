@@ -36,7 +36,7 @@ app.add_middleware(
    allow_headers=["*"]
 )
 
-API_PREFIX = "/api/v3"
+API_PREFIX = "/api/v1"
 
 app.include_router(order_router, prefix=API_PREFIX)
 app.include_router(cart_router, prefix=API_PREFIX)

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.listing_index import listing_index
 from app.db.database import SessionLocal
+from app.models.crop import Crop
 from app.models.crop_listing import CropListing
 from app.schemas.crop_listing_schema import (CropListingCreate, CropListingResponse, QualityRating)
 from app.schemas.pagination import PaginatedResponse
@@ -95,6 +96,26 @@ def get_crop_listing(
 
     return listing
 
+@router.get(
+    "/by-crop/{crop_name}",
+    response_model=list[CropListingResponse],
+    dependencies=[Depends(require_roles(["admin", "farmer", "buyer"]))],
+)
+def get_listings_by_crop_name(
+    crop_name: str,
+    db: Session = Depends(get_db),
+):
+    listings = (
+        db.query(CropListing)
+        .join(Crop, Crop.id == CropListing.crop_id)
+        .filter(
+            CropListing.available == True,
+            Crop.name.ilike(crop_name)
+        )
+        .all()
+    )
+
+    return listings
 
 @router.post("/{listing_id}/rate",
              dependencies=[Depends(require_roles(["buyer", "admin"]))]

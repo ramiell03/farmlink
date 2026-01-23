@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
@@ -20,7 +21,7 @@ class Token(BaseModel):
     role: str
     
 class UserResponse(BaseModel):
-    id: int
+    id: UUID
     email: EmailStr
     username: str
     role: str
