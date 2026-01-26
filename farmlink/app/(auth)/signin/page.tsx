@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation"; // <--- app router
+import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 import {
   Card,
@@ -26,22 +26,21 @@ export default function SignInPage() {
     const id = toast.loading("Signing in...");
 
     try {
-      const data = await login({ email, password });
-
-      // Set cookies if needed (or API route already sets httpOnly cookies)
-      document.cookie = `access_token=${data.access_token}; path=/`;
-      document.cookie = `refresh_token=${data["refresh-token"]}; path=/`;
+      const { role } = await login({ email, password });
 
       toast.success("Signed in successfully", { id });
 
-      // <-- Redirect after successful login
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      const errorMessage =
-        err && typeof err === "object" && "message" in err
-          ? (err as { message?: string }).message
-          : "Invalid credentials";
-      toast.error(errorMessage || "Invalid credentials", { id });
+      // 🔹 Delay slightly to ensure middleware sees cookie
+      setTimeout(() => {
+        console.log("🟢 ROLE:", role);
+
+        if (role === "admin") router.push("/dashboard/admin");
+        else if (role === "farmer") router.push("/dashboard/farmer");
+        else router.push("/dashboard/buyer");
+      }, 100);
+
+    } catch (err: any) {
+      toast.error(err.message || "Invalid credentials", { id });
     }
   };
 
