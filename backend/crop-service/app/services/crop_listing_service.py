@@ -38,3 +38,29 @@ def rate_listing(db: Session, listing_id: UUID, rating: float):
 
     db.commit()
     return listing
+
+def update_listing(
+    db: Session,
+    listing_id: UUID,
+    quantity: int,
+    farmer_id: UUID
+):
+    listing = db.query(CropListing).filter(
+        CropListing.id == listing_id,
+        CropListing.farmer_id == farmer_id
+    ).first()
+
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+
+    if quantity < 0:
+        raise HTTPException(status_code=400, detail="Invalid quantity")
+
+    listing.quantity = quantity
+    listing.available = quantity > 0
+
+    db.commit()
+    db.refresh(listing)
+
+    return listing
+

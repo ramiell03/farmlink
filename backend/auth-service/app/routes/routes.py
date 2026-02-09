@@ -127,6 +127,6 @@ def confirm_email_change(
     user.email = data["new_email"]
     db.commit()
     
-    return {"massage": "Email updated sucessfully"}
+    return {"message": "Email updated sucessfully"}
     
     

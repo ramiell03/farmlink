@@ -1,5 +1,6 @@
 
-from sqlalchemy import Column, Integer, Float, ForeignKey, Enum,UUID
+from datetime import datetime
+from sqlalchemy import Column, DateTime, Integer, Float, ForeignKey, Enum,UUID
 from app.db.database import Base
 from app.enums.order_status import OrderStatus
 import uuid
@@ -16,4 +17,4 @@ class Order(Base):
     quantity = Column(Integer, nullable=False)
     total_price = Column(Float, nullable=False)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING, nullable=False)
-    
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)                                                                        

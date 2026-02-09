@@ -27,3 +27,7 @@ class CropListingResponse(BaseModel):
 class QualityRating(BaseModel):
     rating: float
     comment: Optional[str] = None
+    
+class CropListingUpdate(BaseModel):
+    quantity: int
+    available: Optional[bool] = True

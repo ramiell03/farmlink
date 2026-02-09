@@ -74,3 +74,12 @@ def get_token_from_header(authorization: Optional[str]) -> str:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authorization header format"
         )
+
+def get_total_users(token: str) -> int:
+    res = requests.get(
+        f"{AUTH_SERVICE_URL}/admin/users",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=15
+    )
+    res.raise_for_status()
+    return res.json()["total"]

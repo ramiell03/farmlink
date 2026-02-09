@@ -5,9 +5,9 @@ from app.core.listing_index import listing_index
 from app.db.database import SessionLocal
 from app.models.crop import Crop
 from app.models.crop_listing import CropListing
-from app.schemas.crop_listing_schema import (CropListingCreate, CropListingResponse, QualityRating)
+from app.schemas.crop_listing_schema import (CropListingCreate, CropListingResponse, CropListingUpdate, QualityRating)
 from app.schemas.pagination import PaginatedResponse
-from app.services.crop_listing_service import create_listing, rate_listing
+from app.services.crop_listing_service import create_listing, rate_listing, update_listing
 from app.core.auth_client import require_roles
 
 
@@ -45,11 +45,17 @@ def create_crop_listing(
 def list_crop_listings(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    limit: int | None = Query(None, ge=1, le=100),
     crop_id: UUID | None = Query(None),
     location: str | None = Query(None),
     db: Session = Depends(get_db),
-    user=Depends(require_roles(["admin","farmer","buyer"]))
+    user=Depends(require_roles(["admin", "farmer", "buyer"]))
 ):
+    # If limit is provided, override page_size
+    if limit:
+        page_size = limit
+        page = 1
+
     query = db.query(CropListing).filter(CropListing.available == True)
 
     if crop_id:
@@ -127,3 +133,35 @@ def rate_crop(
     user=Depends(require_roles(["buyer", "admin"]))
 ):
     return rate_listing(db, listing_id, rating.rating)
+
+@router.get(
+    "/by-farmer/{farmer_id}",
+    dependencies=[Depends(require_roles(["farmer", "admin"]))]
+)
+def get_listings_by_farmer(
+    farmer_id: UUID,
+    db: Session = Depends(get_db)
+):
+    return (
+        db.query(CropListing)
+        .filter(CropListing.farmer_id == farmer_id)
+        .all()
+    )
+
+@router.patch(
+    "/{listing_id}",
+    response_model=CropListingResponse,
+    dependencies=[Depends(require_roles(["farmer"]))]
+)
+def update_crop_listing(
+    listing_id: UUID,
+    data: CropListingUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(require_roles(["farmer"]))
+):
+    return update_listing(
+        db=db,
+        listing_id=listing_id,
+        quantity=data.quantity,
+        farmer_id=user["id"]
+    )

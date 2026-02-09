@@ -33,3 +33,9 @@ class IngestPriceResponse(BaseModel):
     crop: str
     price: float
     status: str
+    
+class AdminStatsResponse(BaseModel):
+    users: int
+    listings: int
+    orders: int
+    revenue: float

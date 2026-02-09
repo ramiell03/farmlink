@@ -21,8 +21,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create Next.js response
-    const response = NextResponse.json({ role: data.role });
+     const response = NextResponse.json({ 
+      role: data.role,
+      user_id: data.user_id, // Add this
+      email: data.email,
+      username: data.username 
+    });
+
 
     // ✅ Set httpOnly cookies for frontend domain
     response.cookies.set("access_token", data.access_token, {
@@ -37,6 +42,7 @@ export async function POST(req: Request) {
     });
 
     return response;
+    
   } catch (error) {
     console.error("Login route error:", error);
     return NextResponse.json(

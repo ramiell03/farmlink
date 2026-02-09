@@ -4,7 +4,7 @@ from app.db.database import SessionLocal
 from sqlalchemy.orm import Session
 from app.models.user import User
 from typing import List
-from app.schemas.user_schema import UserResponse
+from app.schemas.user_schema import UserResponse, UsersWithCountResponse
 
 router = APIRouter(prefix="/admin", tags=["admin Operations"])
 
@@ -16,12 +16,16 @@ def get_db():
         db.close()
         
         
-@router.get("/users", response_model=List[UserResponse])
+@router.get("/users", response_model=UsersWithCountResponse)
 def list_users(
     current_user=Depends(require_roles(["admin"])),
     db: Session = Depends(get_db)
-    ):
-    return db.query(User).all()
+):
+    users = db.query(User).all()
+    return {
+        "total": len(users),
+        "users": users
+    }
 
 @router.delete("/user/{user_id}")
 def delete_user(

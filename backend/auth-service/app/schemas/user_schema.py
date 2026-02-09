@@ -1,6 +1,6 @@
 from uuid import UUID
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import List, Optional
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -45,3 +45,7 @@ class EmailChangeRequest(BaseModel):
     
 class EmailConfirm(BaseModel):
     token: str
+    
+class UsersWithCountResponse(BaseModel):
+    total: int
+    users: List[UserResponse]

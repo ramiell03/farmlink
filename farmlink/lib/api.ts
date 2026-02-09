@@ -15,6 +15,9 @@ interface RegisterData {
 
 interface LoginResponse {
   role: string;
+  user_id: string;  // Add this
+  email: string;    // Add this
+  username: string;
 }
 
 export async function login(data: LoginData) {
@@ -33,6 +36,10 @@ export async function login(data: LoginData) {
 
   // Store role in localStorage for UI routing
   localStorage.setItem("role", result.role);
+  localStorage.setItem("user_id", result.user_id);
+  localStorage.setItem("email", result.email);
+  localStorage.setItem("username", result.username);
+  localStorage.setItem("is_authenticated", "true");
 
   return result;
 }
@@ -50,4 +57,20 @@ export async function register(data: RegisterData) {
   }
 
   return res.json();
+}
+
+// Logout function
+export async function logout() {
+  // Clear localStorage
+  localStorage.removeItem("role");
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("email");
+  localStorage.removeItem("username");
+  localStorage.removeItem("is_authenticated");
+  
+  // Call logout API to clear cookies
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
 }

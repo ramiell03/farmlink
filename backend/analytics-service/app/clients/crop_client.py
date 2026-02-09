@@ -26,3 +26,12 @@ def get_listing(listing_id: UUID, token: str) -> dict:
 
 def get_listing_price(listing_id: UUID, token: str) -> float:
     return get_listing(listing_id, token)["price"]
+
+def get_total_listings(token: str) -> int:
+    res = requests.get(
+        f"{settings.LISTING_SERVICE_URL}?limit=1",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=15
+    )
+    res.raise_for_status()
+    return res.json()["total"]

@@ -1,6 +1,8 @@
 import httpx
 from typing import List, Dict
 from uuid import UUID
+
+import requests
 from app.core.config import settings  
 
 def get_orders_for_crop(crop: str, token: str) -> List[Dict]:
@@ -23,3 +25,12 @@ def get_orders_for_crop(crop: str, token: str) -> List[Dict]:
     except httpx.HTTPStatusError as e:
         print(f"[Order Client] HTTP error: {e}")
         return []
+
+def get_orders_admin(token: str) -> dict:
+    res = requests.get(
+        f"{settings.ORDER_SERVICE_URL}/admin/stats",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=10
+    )
+    res.raise_for_status()
+    return res.json()
